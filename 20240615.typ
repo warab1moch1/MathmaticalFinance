@@ -1,0 +1,162 @@
+#import "manual_template.typ": *
+#import "theorems.typ": *
+#show: thmrules
+
+// Define theorem environments
+
+#let theorem = thmbox(
+  "theorem",
+  "Theorem",
+  fill: rgb("#e8e8f8")
+)
+#let lemma = thmbox(
+  "theorem",            // Lemmas use the same counter as Theorems
+  "Lemma",
+  fill: rgb("#efe6ff")
+)
+#let corollary = thmbox(
+  "corollary",
+  "Corollary",
+  base: "theorem",      // Corollaries are 'attached' to Theorems
+  fill: rgb("#f8e8e8")
+)
+
+#let definition = thmbox(
+  "definition",         // Definitions use their own counter
+  "Definition",
+  fill: rgb("#e8f8e8")
+)
+
+#let exercise = thmbox(
+  "exercise",
+  "Exercise",
+  stroke: rgb("#ffaaaa") + 1pt,
+  base: none,           // Unattached: count globally
+).with(numbering: "I")  // Use Roman numerals
+
+// Examples and remarks are not numbered
+#let example = thmplain("example", "Example").with(numbering: none)
+#let remark = thmplain(
+  "remark",
+  "Remark",
+  inset: 0em
+).with(numbering: none)
+
+// Proofs are attached to theorems, although they are not numbered
+#let proof = thmproof(
+  "proof",
+  "Proof",
+  base: "theorem",
+)
+
+#let solution = thmplain(
+  "solution",
+  "Solution",
+  base: "exercise",
+  inset: 0em,
+).with(numbering: none)
+
+#let project(title: "", authors: (), url: "", body) = {
+  set page(paper: "a4", numbering: "1", number-align: center)
+  set document(author: authors, title: title)
+  set text(font: "Linux Libertine", lang: "en")
+  set heading(numbering: "1.1.")
+  set par(justify: true)
+  set list(marker: ([•], [--]))
+  show heading: it => pad(bottom: 0.5em, it)
+  show raw.where(block: true): it => pad(left: 4em, it)
+  show link: it => underline(text(fill: blue, it))
+
+
+  align(center)[
+    #block(text(weight: 700, 1.75em, title))
+  ]
+
+  pad(
+    top: 0.5em,
+    bottom: 2em,
+    x: 2em,
+    grid(
+      columns: (1fr,) * calc.min(3, authors.len()),
+      gutter: 1em,
+      ..authors.map(author => align(center)[
+        #author \
+        #link(url)
+      ]),
+    ),
+  )
+
+  outline(indent: true)
+
+  v(2em)
+
+  body
+}
+
+#show: project.with(
+  title: "No.6",
+  authors: (
+    "warab1moch1",
+  ),
+  url: "https://github.com/warab1moch1"
+)
+
+
+== 停止時刻
+
+$(Omega, cal(F), PP, cal(F)_t)$ : filtrated Probability Space であるとする。
+
+#definition[#h(1mm)停止時刻\
+$T$ : $Omega arrow.r [0, infinity]$#footnote[
+  $infinity$ を含むことに注意
+] が停止時刻であるとは、$T$ が確率変数であって、かつ
+$ forall t >= 0 quad {T <= t} in.small cal(F)_t $
+であることをいう。
+ここで、${T <= t} = {omega in.small Omega|T(omega) <= t}$ である。
+
+このとき、
+$ cal(F)_t := {A in.small cal(F)|forall t >= 0 quad A sect {T <= t} in.small cal(F)_t} $
+を（停止）時刻 $T$ での情報系（$sigma$ - 加法族）という。 
+]
+
+このときの直観的な解釈としては、#v(1mm)
+-- $T$ はランダムな時刻である\
+定義より、
+$ T : Omega arrow.r [0, infinity] $
+である確率変数であり、（上での表記の通り）時刻 $T$ 自体はあるランダムネスの素 $omega$ に基づいている。#v(1mm)
+-- 停止時刻の意味合い\
+確率変数であるということに加え、更に
+$ {T <= t} in.small cal(F)_t (forall t >= 0) $
+である。これは、『未来の情報を使わずに決めることの時刻』であることを意味している。卑近な例としては、#v(1mm)
+- 所持金が初めて1万円を割る時刻 $T$
+当然ではあるが、これは、その瞬間（割ったタイミング）にしかわからないため、停止時刻である条件を満たしている。
+
+逆に、そうでない例としては#v(1mm)
+- いずれ1万円を割るなら $0$、それ以外なら $100$ として定めた時刻 $S$
+これは、未来の情報（条件）を使っていることから停止時刻でない。
+
+#example[#h(1mm)今後の考察の対象\
+  -- $T equiv s$ : 定数時刻\
+  #proof[
+    $ {T <= t} &attach(eq, t: "def") {s <= t}\
+    &= cases(
+      Omega quad (s<= t),
+      nothing quad (s > t)
+    ) in.small cal(F)_t
+  $
+  ]
+  -- $T,#h(1mm) S$ : 停止時刻であるとき、$T + S$、$min(T, S)$
+  #proof[
+    $ {(T and S) <= t}#footnote[
+      $ T and S := min(T, S) $
+    ] = {T <= t} union {S <= t} $
+    であり、$T, S$ がいずれも停止時刻であるという仮定から
+    $ {T <= t},#h(1mm) {S <= t} in.small cal(F)_t $
+    であり、その有限和もまた $in.small cal(F)_t$ である。
+  ]
+  このように、標準的な演算は（おおよそ）停止時刻になることがわかる。
+]
+
+
+
+
